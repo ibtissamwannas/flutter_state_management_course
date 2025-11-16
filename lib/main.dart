@@ -13,7 +13,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: false,
       ),
       home: const MyHomePage(),
       routes: {'/new-contact': (context) => NewContact()},
@@ -28,11 +29,9 @@ class Contact {
 }
 
 class ContactBook extends ValueNotifier<List<Contact>> {
-  ContactBook._sharedInstance() : super([]);
-  static final ContactBook _shared = ContactBook._sharedInstance();
+  ContactBook._() : super([Contact(name: 'foo')]);
+  static final ContactBook _shared = ContactBook._();
   factory ContactBook() => _shared;
-
-  final List<Contact> _contacts = [Contact(name: 'foo')];
 
   int get length => value.length;
 
@@ -44,7 +43,7 @@ class ContactBook extends ValueNotifier<List<Contact>> {
 
   void remove({required Contact contact}) {
     final contacts = value;
-    if (value.contains(contact)) {
+    if (contacts.contains(contact)) {
       contacts.remove(contact);
       notifyListeners();
     }
@@ -59,20 +58,33 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final contactBook = ContactBook();
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blue,
         onPressed: () async {
           await Navigator.of(context).pushNamed('/new-contact');
         },
         child: Icon(Icons.add),
       ),
       appBar: AppBar(backgroundColor: Colors.blue, title: Text("Home Page")),
-      body: ListView.builder(
-        itemCount: contactBook.length,
-        itemBuilder: (context, index) {
-          final contact = contactBook.contact(atIndex: index);
-          return ListTile(title: Text(contact!.name));
+      body: ValueListenableBuilder(
+        valueListenable: ContactBook(),
+        builder: (BuildContext context, value, Widget? child) {
+          // final contacts = value;
+          return ListView.builder(
+            itemCount: value.length,
+            itemBuilder: (context, index) {
+              final contact = value[index];
+              return Dismissible(
+                onDismissed: (direction) {
+                  // contacts.remove(contact);
+                  ContactBook().remove(contact: contact);
+                },
+                key: ValueKey(contact.id),
+                child: ListTile(title: Text(contact.name)),
+              );
+            },
+          );
         },
       ),
     );
