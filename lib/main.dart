@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:state_management_course/test_value_notifier.dart';
 import 'package:uuid/uuid.dart';
 
 void main() {
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: false,
       ),
-      home: const MyHomePage(),
+      home: TextMain(),
       routes: {'/new-contact': (context) => NewContact()},
     );
   }
